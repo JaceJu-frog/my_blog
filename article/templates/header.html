@@ -1,0 +1,89 @@
+
+<!-- 新增 -->
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <!-- 导航栏商标 -->
+        <a class="navbar-brand" href="#">我的博客</a>
+
+        <!-- 导航入口 -->
+        <div>
+            <ul class="navbar-nav">
+                <!-- 条目 -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "article:article_create" %}">新建文章</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "article:article_list" %}">文章列表</a>
+                </li>
+                <!-- Django的 if 模板语句 -->
+                {% if user.is_authenticated %}
+                    <!-- 如果用户已经登录，则显示用户名下拉框 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                            <li><a class="dropdown-item" href="#" onclick="user_delete()">删除用户</a></li>
+                            <li><a class="dropdown-item" href="{% url "userprofile:logout" %}">退出登录</a></li>
+                        </ul>
+                    </li>
+                    <!-- 如果用户未登录，则显示 “登录” -->
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'userprofile:login' %}">登录</a>
+                    </li>
+                    <!-- if 语句在这里结束 -->
+                {% endif %}
+
+            </ul>
+        </div>
+
+    </div>
+</nav>
+
+{# 判断用户是否登录，不能放在这个header.html的头部，否则 整个导航栏都不显示啦#}
+{% if user.is_authenticated %}
+{#   隐藏表单#}
+<form
+    style="display:none;"
+    id="user_delete"
+    action="{% url 'userprofile:delete' user.id %}"
+    method="POST"
+>
+{% csrf_token %}
+    <button type="submit" >删除用户</button>
+</form>
+
+<script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function user_delete() {
+            var layer = layui.layer;
+
+            // Create a prompt box with the "yes" button
+            layer.confirm('是否确定删除用户？', {
+                btn: ['是的', '不是'] // Specify the text for the buttons
+            }, function execute_delete() {
+                // If the user clicks "Yes", execute this function
+                layer.msg('你确认删除了！');
+                sleep(2000).then(() => {
+                    {# 这里指定form的id，并点击按钮#}
+                    document.querySelector('form#user_delete button').click();
+                    console.log('删除点击成功!');
+                    {#location.href = '{% url "article:article_delete" article.id %}'#}
+                })
+
+            }, function () {
+                // If the user clicks "No", execute this function
+                layer.msg('你还要再想想');
+            });
+        }
+</script>
+
+{% endif %}

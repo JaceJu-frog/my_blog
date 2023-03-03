@@ -1,0 +1,14 @@
+{#依然继承base.html#}
+{% extends "base.html" %}
+
+{% block title %} 错误信息提示 {% endblock title %}
+
+{% block content %}
+    {# bootstrap常见的容器类 #}
+    <div class="container">
+        <div class="row">
+            {#  不让html乱转义#}
+            {{ error|safe }}
+        </div>
+    </div>
+{% endblock %}
