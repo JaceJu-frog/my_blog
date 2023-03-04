@@ -1,5 +1,7 @@
-# 通过render函数，从模板生成网页;redirect重定向
+# @login提示登录，用在修改文章
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+# 通过render函数，从模板生成网页;redirect重定向
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -12,6 +14,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from .forms import ArticlePostForm
 
+# 引入分页
+from django.core.paginator import Paginator
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at the article index.")
@@ -20,14 +25,24 @@ def index(request):
 def article_list(request):
     # 取出博客所有文章
     articles = ArticlePost.objects.all()
-    # render函数：载入模板，并返回context对象
+    # 引入paginator，每页1篇
+    article_paginator = Paginator(articles, 3)
+    # 网页展示为.../?page=1,get是用于获取页码的
+    page_number = request.GET.get('page')
+
+    # 将导航对象相应的页码内容返回给articles
+    articles=article_paginator.get_page(page_number)
+    # 在视图中通过Paginator类，给传递给模板的内容做了手脚：
+    # 返回的不再是所有文章的集合，而是对应页码的部分文章的对象，并且这个对象还包含了分页的方法。
     return render(request, 'article/article_list.html', context={"articles": articles})
 
 
 def article_detail(request, id):
     # 取出相应的文章
     article = ArticlePost.objects.get(id=id)
-
+    # 每次访问增加1的浏览量
+    article.total_views += 1
+    article.save(update_fields=['total_views'])
     # 将content中markdown语法渲染成html样式
     article.content = markdown.markdown(article.content,
                                      extensions=[
@@ -51,8 +66,8 @@ def article_create(request):
             # 保存数据，但暂时不提交到数据库中。
             new_article_post = article_post_form.save(commit=False)
 
-            # 暂时先指定数据库中id=1的用户为作者
-            new_article_post.author = User.objects.get(id=1)
+            # 指定目前登录的用户为作者
+            new_article_post.author = request.user
             # 将新文章保存到数据库中
             print(new_article_post.author)
             new_article_post.save()
@@ -68,18 +83,23 @@ def article_create(request):
         context = {'article_post_form':article_post_form}
         return render(request, 'article/article_create.html',context=context)
 
+@login_required(login_url='/userprofile/login/')
 def article_delete(request, id):
     # 以POST形式，否则别人用get可以直接删除
     if request.method == 'POST':
         # 取出相应的文章
         article = ArticlePost.objects.get(id=id)
-        # 将文章从数据库中删除
-        article.delete()
-        # 完成后返回到文章列表
-        return HttpResponseRedirect(reverse("article:article_list"))
+        if request.user == article.author:
+            # 将文章从数据库中删除
+            article.delete()
+            # 完成后返回到文章列表
+            return HttpResponseRedirect(reverse("article:article_list"))
+        else:
+            return HttpResponse("只有作者才能删除")
     else:
         return HttpResponse("仅允许post请求")
 
+@login_required(login_url='/userprofile/login/')
 def article_update(request, id):
     """
     更新文章的视图函数
@@ -90,6 +110,7 @@ def article_update(request, id):
 
     # 获取需要修改的具体文章对象
     article = ArticlePost.objects.get(id=id)
+
 
     # 判断用户是否为POST提交表单数据
     if request.method == 'POST':
@@ -103,8 +124,8 @@ def article_update(request, id):
             # 如果想要在提交前增加更多属性，这是一种常规做法
             article_post_form = article_post_form.save(commit=False)
 
-            # 暂时先指定数据库中id=1的用户为作者，并调用save()方法保存
-            article_post_form.author = User.objects.get(id=1)
+            # 指定目前登录的用户为作者
+            article_post_form.author = request.user
             article_post_form.save()
             # 完成后返回到这篇文章
             return HttpResponseRedirect(reverse("article:article_detail",kwargs={'id': id}))
@@ -114,7 +135,11 @@ def article_update(request, id):
 
     #如果用户是get方法请求数据，也就是通过"修改文章"按钮访问此页面
     else:
-        # 赋值上下文
-        context = {'article':article}
-        # 将响应返回到模板中
-        return render(request, 'article/article_update.html',context=context)
+        # 只有作者本人才能修改
+        if article.author == request.user:
+            # 赋值上下文
+            context = {'article':article}
+            # 将响应返回到模板中
+            return render(request, 'article/article_update.html',context=context)
+        else:
+            return HttpResponse("只有作者才能修改")

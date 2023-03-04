@@ -16,16 +16,21 @@
             <h1 class="col-12 mt-4 mb-4">{{ article.title }}</h1>
             {# class用于修饰样式，alert-success 表示绿色的alert #}
             <div class="col-12 alert alert-success">作者：{{ article.author }}
-{#                调用的confirm_delete()函数在下方#}
-                <a class="btn btn-primary" href="{% url "article:article_update" article.id%}"> 修改文章</a>
-                <a class="btn btn-danger" onclick="confirm_delete()"> 删除文章</a>
-            </div>
-            <!-- 文章正文 -->
-            <div class="col-12">
-{#                这里加上|safe防止html乱转义#}
-                <p>{{ article.content|safe }}</p>
+                {#    调用的confirm_delete()函数在下方js #}
+                {% if user == article.author %}
+                    <a class="btn btn-primary" href="{% url "article:article_update" article.id %}"> 修改文章</a>
+                    <a class="btn btn-danger" onclick="confirm_delete()"> 删除文章</a>
+                {% endif %}
+                浏览量：{{ article.total_views }}
             </div>
         </div>
+
+        <!-- 文章正文 -->
+        <div class="col-12">
+            {#                这里加上|safe防止html乱转义#}
+            <p>{{ article.content|safe }}</p>
+        </div>
+    </div>
     </div>
 
     <!-- 新增一个隐藏的表单 -->

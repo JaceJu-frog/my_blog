@@ -3,6 +3,7 @@ from django import forms
 # 引入User模型
 from django.contrib.auth.models import User
 from django.forms import ModelForm
+from .models import Profile
 from django.contrib.auth.forms import UserCreationForm
 
 
@@ -23,5 +24,11 @@ class UserRegisterForm(UserCreationForm):
         model = User
         #展示的字段
         fields = ['id','username', 'email']
+
+# 新建一个表单以编辑用户信息
+class ProfileForm(ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('phone', 'avatar', 'bio')
 
 

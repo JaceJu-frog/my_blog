@@ -13,6 +13,9 @@ class ArticlePost(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     # Django具有一个简单的账号系统（User），满足一般网站的用户相关的基本功能。
 
+    # 设置文章浏览量，初始值为0.
+    total_views = models.PositiveIntegerField(default=0)
+
     # 文章标题.models.CharField为字符串字段，用于保存较短的字符串，比如标题
     title = models.CharField(max_length=200)
 

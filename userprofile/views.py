@@ -5,7 +5,8 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 
 from django.contrib.auth.models import User
-from .forms import UserLoginForm,UserRegisterForm
+from .forms import UserLoginForm,UserRegisterForm,ProfileForm
+from .models import Profile
 
 def user_login(request):
     if request.method == 'POST':
@@ -81,4 +82,42 @@ def user_delete(request, id):
             return HttpResponse("你没有删除操作的权限。")
     else:
         return HttpResponse("仅接受post请求。")
+
+@login_required(login_url='/userprofile/login/')
+def profile_edit(request,id):
+    user = User.objects.get(id=id)
+
+    # user_id 是OneToOneField 自动生成的字段，用来表征两个数据库的关联
+    # 这段代码通过查找user_id定位到对应的profile
+    profile = Profile.objects.get(user_id=id)
+
+    if request.method == 'POST':
+        # 验证修改数据者是否为用户本人
+        if request.user != user:
+            return HttpResponse("你没有权限修改此用户信息。")
+        profile_form = ProfileForm(data=request.POST,files=request.FILES,instance=profile)
+        if profile_form.is_valid():
+            # 取得清洗后的合法数据，还是一个字典
+            profile_cd = profile_form.cleaned_data
+            # 对字典按键取值并给profile，由profile完成保存
+            profile.phone=profile_cd['phone']
+            profile.bio=profile_cd['bio']
+
+            # 如果 request.FILES 存在文件，则保存"avatar"的值
+            if 'avatar' in request.FILES:
+                # 注意profile.avatar 保存的是 图片路径
+                profile.avatar = profile_cd["avatar"]
+            profile.save()
+            # 带参数redirect页面
+            return redirect('article:article_list')
+        else:
+            return HttpResponse("注册表单输入有误，请重新输入~")
+    elif request.method == 'GET':
+        profile_form = ProfileForm()
+        print(profile.avatar if profile.avatar else "No picture")
+        context = {'profile':profile,'user':user}
+        return render(request,'userprofile/edit.html',context)
+    else:
+        return HttpResponse("请使用GET或者POST请求")
+
 

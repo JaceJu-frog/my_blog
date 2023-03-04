@@ -27,6 +27,7 @@
                             {{ user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                            <li><a class="dropdown-item" href='{% url "userprofile:edit" user.id %}'>个人信息</a></li>
                             <li><a class="dropdown-item" href="#" onclick="user_delete()">删除用户</a></li>
                             <li><a class="dropdown-item" href="{% url "userprofile:logout" %}">退出登录</a></li>
                         </ul>

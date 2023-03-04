@@ -127,5 +127,12 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MEDIA_ROOT = 'article/images/'# 保存[用户上传的文件]目录的绝对文件系统路径
-MEDIA_URL = '/media/'# 媒体文件的相对路径
+
+# MEDIA_URL代表用户通过URL来访问这个本地地址的URL。
+# 设置好这个参数后，用户就可以通过解析url，很方便的获取文件的地址。这样做的好处是避免硬编码，让代码更容易维护。
+MEDIA_URL = '/media/'
+
+# 在前面的Profile中我们设置了upload_to参数。有了这个参数，
+# 文件上传后将自动保存到项目根目录的media文件夹中。
+# os.path.join(MEDIA_ROOT, 'media/')指定了media文件夹的位置。
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
