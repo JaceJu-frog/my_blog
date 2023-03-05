@@ -13,8 +13,8 @@
         <div class="row mt-2">
             <div class="col-12">
                 <!-- 提交文章的表单 -->
+                <!-- action="."指定了表单提交的地址为默认的当前url -->
             <form method="post" action=".">
-                {#action="."指定了表单提交的地址为默认的当前url#}
                 <!-- Django中需要POST数据的地方都必须有csrf_token -->
                 {% csrf_token %}
                 <!-- 文章标题 -->

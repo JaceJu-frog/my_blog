@@ -22,6 +22,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("article/", include("article.urls",namespace="article")),
     path('userprofile/', include('userprofile.urls',namespace='userprofile')),
+    path('comment/', include('comment.urls',namespace='comment')),
 ]
 
 #添加这行为以后上传的图片配置URL路径

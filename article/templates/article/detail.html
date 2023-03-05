@@ -26,9 +26,9 @@
             </div>
         </div>
         <div class="row">
-            <!-- 文章正文 -->
+            <!-- 文章正文，占9栏 -->
             <div class="col-9">
-                {#                这里加上|safe防止html乱转义#}
+            {#     这里加上|safe防止html乱转义#}
                 <p>{{ article.content|safe }}</p>
             </div>
             <!-- 文章的目录，占3栏 -->
@@ -37,8 +37,13 @@
             </div>
         </div>
     </div>
+    <div class="col-md-4">
+           <div class="panel panel-default">
+               <a href="{% url "comment:create_article_comment" article.id%}">发表评论</a>
+           </div>
+    </div>
 
-    <!-- 新增一个隐藏的表单 -->
+    <!-- 新增一个隐藏的表单，用于删除 -->
     <form
             style="display:none;"
             id="safe_delete"
