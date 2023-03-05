@@ -23,18 +23,45 @@ def index(request):
 
 
 def article_list(request):
-    # 取出博客所有文章
-    articles = ArticlePost.objects.all()
+    # 如果search 不存在会设置为None
+    search = request.GET.get('search')
+    if search:
+        # 引入 Q 对象
+        from django.db.models import Q
+        if request.GET.get('order') == 'hot':
+            # 注意Q对象，Q(title__icontains=search)
+            # 意思是在模型的title字段查询，icontains是不区分大小写的包含，中间用两个下划线隔开。
+            # contains 区分大小写
+            articles = ArticlePost.objects.filter(Q(content__icontains=search) | Q(title__icontains=search)).order_by(
+                "-total_views")
+            order = 'hot'
+        else:
+            articles = ArticlePost.objects.filter(Q(content__icontains=search) | Q(title__icontains=search)).all()
+            order = 'normal'
+
+    else:
+        # 将 search 参数重置为空 ,
+        search = ''
+        # 如果要求“最热”，则取出的文章按浏览量排列
+        if request.GET.get('order') == 'hot':
+            # - 表示倒序
+            articles = ArticlePost.objects.order_by("-total_views")
+            order = 'hot'
+        else:
+            # 取出博客所有文章
+            articles = ArticlePost.objects.all()
+            order = 'normal'
     # 引入paginator，每页1篇
     article_paginator = Paginator(articles, 3)
     # 网页展示为.../?page=1,get是用于获取页码的
     page_number = request.GET.get('page')
 
     # 将导航对象相应的页码内容返回给articles
-    articles=article_paginator.get_page(page_number)
+    articles = article_paginator.get_page(page_number)
     # 在视图中通过Paginator类，给传递给模板的内容做了手脚：
     # 返回的不再是所有文章的集合，而是对应页码的部分文章的对象，并且这个对象还包含了分页的方法。
-    return render(request, 'article/article_list.html', context={"articles": articles})
+    return render(request, 'article/article_list.html',
+                  context={"articles": articles, 'order': order, 'search': search})
 
 
 def article_detail(request, id):
@@ -44,24 +71,27 @@ def article_detail(request, id):
     article.total_views += 1
     article.save(update_fields=['total_views'])
     # 将content中markdown语法渲染成html样式
-    article.content = markdown.markdown(article.content,
-                                     extensions=[
-                                         # 包含 缩写、表格等常用扩展
-                                         'markdown.extensions.extra',
-                                         # 语法高亮扩展
-                                         'markdown.extensions.codehilite',
-                                     ])
+    md = markdown.Markdown(extensions=[
+        # 包含 缩写、表格等常用扩展
+        'markdown.extensions.extra',
+        # 语法高亮扩展
+        'markdown.extensions.codehilite',
+        # 目录扩展
+        'markdown.extensions.toc',
+    ])
+    article.content = md.convert(article.content)
     # 需要传递给模板的对象，虽然上面的语句改变了article.content，但是context依然传入article就好。
-    context = {'article': article}
+    context = {'article': article, 'toc': md.toc}
     # 载入模板，并返回context对象
     return render(request, 'article/detail.html', context)
+
 
 def article_create(request):
     # 判断用户是否提交数据
     if request.method == 'POST':
         # 将提交的数据赋值到表单实例中
         article_post_form = ArticlePostForm(data=request.POST)
-        print(article_post_form.is_valid()) #False
+        print(article_post_form.is_valid())  # False
         if article_post_form.is_valid():
             # 保存数据，但暂时不提交到数据库中。
             new_article_post = article_post_form.save(commit=False)
@@ -75,13 +105,14 @@ def article_create(request):
             return HttpResponseRedirect(reverse("article:article_list"))
         # 如果数据不合法，返回错误信息
 
-    #如果用户是get方法请求数据
+    # 如果用户是get方法请求数据
     else:
         # 创建表单类实例
-        article_post_form= ArticlePostForm()
+        article_post_form = ArticlePostForm()
         # 赋值上下文
-        context = {'article_post_form':article_post_form}
-        return render(request, 'article/article_create.html',context=context)
+        context = {'article_post_form': article_post_form}
+        return render(request, 'article/article_create.html', context=context)
+
 
 @login_required(login_url='/userprofile/login/')
 def article_delete(request, id):
@@ -99,6 +130,7 @@ def article_delete(request, id):
     else:
         return HttpResponse("仅允许post请求")
 
+
 @login_required(login_url='/userprofile/login/')
 def article_update(request, id):
     """
@@ -111,12 +143,11 @@ def article_update(request, id):
     # 获取需要修改的具体文章对象
     article = ArticlePost.objects.get(id=id)
 
-
     # 判断用户是否为POST提交表单数据
     if request.method == 'POST':
         # 创建表单来修改现有的article,data是POST方法传入的参数，用于更新表单。
         # instance让表单基于这篇文章操作，没有instance=article,就会新建一个对象！！我的五六篇文章就是这么得来的。
-        article_post_form = ArticlePostForm(data=request.POST,instance=article)
+        article_post_form = ArticlePostForm(data=request.POST, instance=article)
 
         # 判断提交的数据是否符合表单的要求
         if article_post_form.is_valid():
@@ -128,18 +159,18 @@ def article_update(request, id):
             article_post_form.author = request.user
             article_post_form.save()
             # 完成后返回到这篇文章
-            return HttpResponseRedirect(reverse("article:article_detail",kwargs={'id': id}))
+            return HttpResponseRedirect(reverse("article:article_detail", kwargs={'id': id}))
         # 如果数据不合法，返回错误信息
         else:
             return HttpResponse(article_post_form.errors)
 
-    #如果用户是get方法请求数据，也就是通过"修改文章"按钮访问此页面
+    # 如果用户是get方法请求数据，也就是通过"修改文章"按钮访问此页面
     else:
         # 只有作者本人才能修改
         if article.author == request.user:
             # 赋值上下文
-            context = {'article':article}
+            context = {'article': article}
             # 将响应返回到模板中
-            return render(request, 'article/article_update.html',context=context)
+            return render(request, 'article/article_update.html', context=context)
         else:
             return HttpResponse("只有作者才能修改")

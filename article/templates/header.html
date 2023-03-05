@@ -12,10 +12,6 @@
             <ul class="navbar-nav">
                 <!-- 条目 -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url "article:article_create" %}">新建文章</a>
-                </li>
-
-                <li class="nav-item">
                     <a class="nav-link" href="{% url "article:article_list" %}">文章列表</a>
                 </li>
                 <!-- Django的 if 模板语句 -->
@@ -27,6 +23,7 @@
                             {{ user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                            <li><a class="dropdown-item nav-link" href="{% url "article:article_create" %}">新建文章</a></li>
                             <li><a class="dropdown-item" href='{% url "userprofile:edit" user.id %}'>个人信息</a></li>
                             <li><a class="dropdown-item" href="#" onclick="user_delete()">删除用户</a></li>
                             <li><a class="dropdown-item" href="{% url "userprofile:logout" %}">退出登录</a></li>
