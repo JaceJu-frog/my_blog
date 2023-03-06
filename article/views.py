@@ -80,7 +80,10 @@ def article_detail(request, id):
         'markdown.extensions.toc',
     ])
     article.content = md.convert(article.content)
+
+    # article_comments = article.objects.filter(article_id=id).order_by('-create')
     # 需要传递给模板的对象，虽然上面的语句改变了article.content，但是context依然传入article就好。
+    # 此外md.toc 算是个html对象，传入markdown的
     context = {'article': article, 'toc': md.toc}
     # 载入模板，并返回context对象
     return render(request, 'article/detail.html', context)

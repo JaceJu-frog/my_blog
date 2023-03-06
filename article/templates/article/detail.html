@@ -26,21 +26,46 @@
             </div>
         </div>
         <div class="row">
-            <!-- 文章正文，占9栏 -->
+            <!-- 文章正文，占9栏,这个9栏很长哦 -->
             <div class="col-9">
             {#     这里加上|safe防止html乱转义#}
-                <p>{{ article.content|safe }}</p>
-            </div>
-            <!-- 文章的目录，占3栏 -->
-            <div class="col-3">
-                {{ toc|safe }}
-            </div>
+            <p>{{ article.content|safe }}</p>
+            <form method="post" action="{% url "comment:create_article_comment" article.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <!-- 文本域不需要 value 属性，直接在标签体中嵌入数据即可 -->
+                    <label for="comment">我也要发表评论</label>
+                    <textarea type="text" class="form-control" id="comment" name="comment" rows="5"
+                              cols="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">发表评论</button>
+            </form>
+
+            <!-- 展示当前文章关联的评论 -->
+            {% for comment in article.article_comment.all %}
+                <!--hr是一根横线-->
+                <hr>
+                <!--p中整体为一个段落，不换行-->
+                <p>
+                <!--strong为粗体-->
+                <strong style="color: pink">
+                    {{ comment.author }}
+                </strong>于
+                <!--span本身并不代表什么，用于group items-->
+                <span style="color: green">{{ comment.created|date:"Y-m-d H:i:s" }}
+                             </span>时说：
+                </p>
+                <div style="font-family: inherit; font-size: 1em;">
+                    {{ comment.comment }}
+                </div>
+
+            {% endfor %}
         </div>
-    </div>
-    <div class="col-md-4">
-           <div class="panel panel-default">
-               <a href="{% url "comment:create_article_comment" article.id%}">发表评论</a>
-           </div>
+        <!-- 文章的目录，占3栏 -->
+        <div class="col-3">
+            {{ toc|safe }}
+        </div>
+        </div>
     </div>
 
     <!-- 新增一个隐藏的表单，用于删除 -->
