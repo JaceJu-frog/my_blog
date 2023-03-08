@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 # 导入数据模型ArticlePost
-from .models import ArticlePost
+from .models import ArticlePost, ArticleColumn
 # 导入markdown2html的库
 import markdown
 
@@ -25,43 +25,60 @@ def index(request):
 def article_list(request):
     # 如果search 不存在会设置为None
     search = request.GET.get('search')
-    if search:
-        # 引入 Q 对象
-        from django.db.models import Q
-        if request.GET.get('order') == 'hot':
-            # 注意Q对象，Q(title__icontains=search)
-            # 意思是在模型的title字段查询，icontains是不区分大小写的包含，中间用两个下划线隔开。
-            # contains 区分大小写
-            articles = ArticlePost.objects.filter(Q(content__icontains=search) | Q(title__icontains=search)).order_by(
-                "-total_views")
-            order = 'hot'
-        else:
-            articles = ArticlePost.objects.filter(Q(content__icontains=search) | Q(title__icontains=search)).all()
-            order = 'normal'
+    order = request.GET.get('order')
+    column = request.GET.get('column')
+    tag=request.GET.get('tag')
 
+    # 初始化查询集
+    article_list = ArticlePost.objects.all()
+    # 按搜索
+    if search:
+        # 引入 Q 对象完成联合搜索
+        from django.db.models import Q
+        # 注意Q对象，Q(title__icontains=search)
+        # 意思是在模型的title字段查询，icontains是不区分大小写的包含，中间用两个下划线隔开。
+        # contains 区分大小写
+        article_list = article_list.filter(Q(content__icontains=search) |
+                                       Q(title__icontains=search))
+        order = 'hot'
     else:
-        # 将 search 参数重置为空 ,
+        # 将 search 参数重置为空
         search = ''
-        # 如果要求“最热”，则取出的文章按浏览量排列
-        if request.GET.get('order') == 'hot':
-            # - 表示倒序
-            articles = ArticlePost.objects.order_by("-total_views")
-            order = 'hot'
-        else:
-            # 取出博客所有文章
-            articles = ArticlePost.objects.all()
-            order = 'normal'
+        order='normal'
+
+    # 栏目查询集
+    if column is not None and column.isdigit():
+        article_list = article_list.filter(column=column)
+
+    # 标签查询集
+    # Django-taggit中标签过滤的写法：
+    # filter(tags__name__in=[tag])，
+    # 赋值的字符串tag用方括号包起来。
+    # 因为django-taggit多标签联合查询时，代码为
+    # Model.objects.filter(tags__name__in=["tag1", "tag2"])
+    if tag and tag != 'None':
+        article_list = article_list.filter(tags__name__in=[tag])
+
+    # 查询集最后的排序，如果要求“最热”，则取出的文章按浏览量排列
+    if order == 'hot':
+        # - 表示倒序
+        article_list = article_list.order_by("-total_views")
+
     # 引入paginator，每页1篇
-    article_paginator = Paginator(articles, 3)
+    article_paginator = Paginator(article_list, 3)
     # 网页展示为.../?page=1,get是用于获取页码的
     page_number = request.GET.get('page')
-
-    # 将导航对象相应的页码内容返回给articles
+    # 将导航对象相应的页码内容返回，获取articles
     articles = article_paginator.get_page(page_number)
+
+
     # 在视图中通过Paginator类，给传递给模板的内容做了手脚：
     # 返回的不再是所有文章的集合，而是对应页码的部分文章的对象，并且这个对象还包含了分页的方法。
     return render(request, 'article/article_list.html',
-                  context={"articles": articles, 'order': order, 'search': search})
+                  context={"articles": articles,
+                           'order': order,
+                           'search': search,
+                           'column':column})
 
 
 def article_detail(request, id):
@@ -81,14 +98,15 @@ def article_detail(request, id):
     ])
     article.content = md.convert(article.content)
 
-    # article_comments = article.objects.filter(article_id=id).order_by('-create')
+    article_comments_count = article.article_comment.count()
     # 需要传递给模板的对象，虽然上面的语句改变了article.content，但是context依然传入article就好。
     # 此外md.toc 算是个html对象，传入markdown的
-    context = {'article': article, 'toc': md.toc}
+    context = {'article': article, 'toc': md.toc,'article_comments_count':article_comments_count}
     # 载入模板，并返回context对象
     return render(request, 'article/detail.html', context)
 
 
+@login_required(login_url='/userprofile/login/') # 需要登录
 def article_create(request):
     # 判断用户是否提交数据
     if request.method == 'POST':
@@ -104,6 +122,9 @@ def article_create(request):
             # 将新文章保存到数据库中
             print(new_article_post.author)
             new_article_post.save()
+
+            # 保存 tags 的多对多关系
+            article_post_form.save_m2m()
             # 完成后返回到文章列表
             return HttpResponseRedirect(reverse("article:article_list"))
         # 如果数据不合法，返回错误信息
@@ -112,8 +133,9 @@ def article_create(request):
     else:
         # 创建表单类实例
         article_post_form = ArticlePostForm()
-        # 赋值上下文
-        context = {'article_post_form': article_post_form}
+        # 赋值上下文,提交的表单和栏目
+        columns = ArticleColumn.objects.all()
+        context = {'article_post_form': article_post_form,'columns': columns}
         return render(request, 'article/article_create.html', context=context)
 
 
@@ -171,9 +193,11 @@ def article_update(request, id):
     else:
         # 只有作者本人才能修改
         if article.author == request.user:
-            # 赋值上下文
-            context = {'article': article}
+            # 赋值上下文,提交的表单和栏目
+            columns = ArticleColumn.objects.all()
+            context = {'article': article,'columns': columns}
             # 将响应返回到模板中
             return render(request, 'article/article_update.html', context=context)
+        # 将get模块也设计得有些复杂，是防止坏用户直接猜到链接输入。
         else:
             return HttpResponse("只有作者才能修改")

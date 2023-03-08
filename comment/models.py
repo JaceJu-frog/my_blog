@@ -9,7 +9,7 @@ class ArticleComment(models.Model):
     # 评论由外键连接唯一的作者
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
-                               related_name="article_comment", blank=True,null=True,default="AnonymousUser")
+                               related_name="article_comment", blank=True,null=True)
     # 评论由外键连接唯一的文章
     article_related = models.ForeignKey(ArticlePost,
                                         on_delete=models.CASCADE,

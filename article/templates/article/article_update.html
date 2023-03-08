@@ -1,28 +1,46 @@
-
 {% extends "base.html" %}
 
 {% block title %} 更新文章 {% endblock title %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <br>
-            <form method="post" action=".">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="title">文章标题</label>
-                    <!-- 在 value 属性中指定文本框的初始值为旧的内容，即 article 对象中的 title 字段 -->
-                    <input type="text" class="form-control" id="title" name="title" value="{{ article.title }}">
-                </div>
-                <div class="form-group">
-                    <label for="content">文章正文</label>
-                    <!-- 文本域不需要 value 属性，直接在标签体中嵌入数据即可 -->
-                    <textarea type="text" class="form-control" id="content" name="content" rows="12">{{ article.content }}</textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">完成</button>
-            </form>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <br>
+                <form method="post" action=".">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="title">文章标题</label>
+                        <!-- 在 value 属性中指定文本框的初始值为旧的内容，即 article 对象中的 title 字段 -->
+                        <input type="text" class="form-control" id="title" name="title" value="{{ article.title }}">
+                    </div>
+                    <!--设置文章栏目-->
+                    <div class="form-group">
+                        <label for="column">栏目</label>
+                        <select
+                                name="column" id="column" class="form-control">
+                            <option value="none">请选择栏目..</option>
+                        <!--这里用到下拉框options，if语句若成立，在option的最后加上selected，就直接选中了-->
+                            {% for column in columns %}
+                                <option value="{{ column.id }}"
+                                    {% if column.id == article.column.id %}
+                                        selected
+                                    {% endif %}>
+                                    {{ column }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                <!--tags是自己打的，很乱,updated就别更新了吧-->
+                    <div class="form-group">
+                        <label for="content">文章正文</label>
+                        <!-- 文本域不需要 value 属性，直接在标签体中嵌入数据即可 -->
+                        <textarea type="text" class="form-control" id="content" name="content"
+                                  rows="12">{{ article.content }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">完成</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 {% endblock content %}

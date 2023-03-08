@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -10,7 +11,7 @@ from .forms import ArticleCommentForm
 def index(request):
     return HttpResponse("Hello, world. You're at the comment index.")
 
-
+@login_required(login_url='/userprofile/login/')
 def create_article_comment(request, article_id):
     # 让用户填表
     if request.method == 'POST':

@@ -4,14 +4,31 @@ from django.contrib.auth.models import User
 
 #timezone用于处理时间相关事务
 from django.utils import timezone
+# 一个处理多对多关系的管理器：
+from taggit.managers import TaggableManager
+
+
+# 博客文章分栏
+class ArticleColumn(models.Model):
+    title = models.CharField(max_length=200)
+    # 创建时间
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # __str__方法定义了需要表示数据时应该显示的名称。
+        # return self.title 将文章标题返回
+        return self.title
 
 # 博客文章的数据模型
-
-
 class ArticlePost(models.Model):
     # 文章作者。参数 on_delete用于指定数据删除的方式
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     # Django具有一个简单的账号系统（User），满足一般网站的用户相关的基本功能。
+
+    # 文章所属栏目
+    column = models.ForeignKey(ArticleColumn, on_delete=models.CASCADE,null=True,blank=True,related_name="articles")
+    # 文章标签
+    tags = TaggableManager(blank=True)
 
     # 设置文章浏览量，初始值为0.
     total_views = models.PositiveIntegerField(default=0)
