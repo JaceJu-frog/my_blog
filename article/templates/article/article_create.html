@@ -14,7 +14,7 @@
             <div class="col-12">
                 <!-- 提交文章的表单 -->
                 <!-- action="."指定了表单提交的地址为默认的当前url -->
-                <form method="post" action=".">
+                <form method="post" action="." enctype="multipart/form-data">
                     <!-- Django中需要POST数据的地方都必须有csrf_token -->
                     {% csrf_token %}
                     <!-- 文章标题 -->
@@ -24,6 +24,11 @@
                         <!-- 文本框 -->
                         <input type="text" class="form-control" id="title" name="title" required>
                         <!-- 此处的id=title对应了模型中的title字段 -->
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avatar">标题图</label>
+                        <input type="file" name="avatar" id="avatar" class="form-control-file">
                     </div>
 
                     <!--设置文章栏目-->

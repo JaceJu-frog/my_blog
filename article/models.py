@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 # 一个处理多对多关系的管理器：
 from taggit.managers import TaggableManager
+# 导入pillow库处理标题图
+from PIL import Image
 
 
 # 博客文章分栏
@@ -35,6 +37,29 @@ class ArticlePost(models.Model):
 
     # 文章标题.models.CharField为字符串字段，用于保存较短的字符串，比如标题
     title = models.CharField(max_length=200)
+
+    # 文章标题图
+    avatar = models.ImageField(upload_to='article/%Y%m%d',blank=True,null=True)
+
+    # 重载save()函数
+    def save(self, *args, **kwargs):
+        # 调用父类(models.Model)的save()功能
+        # 即将model中的字段数据保存到数据库中，这里如果有图片也会保存，之后的修改基于已经保存过的图片。
+        article = super(ArticlePost, self).save(*args, **kwargs)
+
+        # 上方代码刚刚保存图片进数据库，现在基于它修改，
+        # 固定宽度缩放图片大小
+        if self.avatar and not kwargs.get('update_fields'):
+            img = Image.open(self.avatar.path)
+            (x,y)=img.size
+            new_x=400
+            new_y = int(new_x * (y / x))
+            # Image.ANTIALIAS表示缩放采用平滑滤波。
+            img = img.resize((new_x, new_y), Image.ANTIALIAS)
+            img.save(self.avatar.path)
+        # 最后一步，将父类save()
+        # 返回的结果原封不动的返回去。
+        return article
 
     # 文章正文。保存大量文本使用TextField
     content = models.TextField()

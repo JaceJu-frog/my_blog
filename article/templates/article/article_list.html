@@ -26,11 +26,13 @@
         <!-- 新增，搜索栏 -->
         <div class="row">
             <div class="col-auto mr-auto">
-                <form class="form-inline">
+                <form class="form-inline"
+                      action="{% url "article:article_list" %}?order={{ order }}&column={{ column }}&tag={{ tag }}">
                     <input type="text"
                            class="form-control mb-2 mr-sm-2"
                            name="search"
                            placeholder="搜索文章..."
+
                            required
                     >
                 </form>
@@ -50,10 +52,19 @@
         <div class="row mt-2">
             {% for article in articles %}
                 <!-- 文章整体是12列 -->
-                <div class="col-12">
+                <!--标题图-->
+                {% if article.avatar %}
+                    <div class="col-3">
+                        <img src="{{ article.avatar.url }}"
+                             alt="avatar"
+                             style="max-width:100%; border-radius: 20px"
+                        >
+                    </div>
+                {% endif %}
+                <div class="col-8">
                     <!-- 栏目名 -->
                     {% if article.column %}
-                        <button type="button"
+                        <a role="button" href="{% url "article:article_list" %}?column={{ article.column.id }}" type="button"
                                 class="btn btn-sm mb-2
                         {% if article.column.title == 'Python' %}
                             btn-success
@@ -66,7 +77,7 @@
                         {% endif %}
                     ">
                             {{ article.column }}
-                        </button>
+                        </a>
                     {% endif %}
 
                     <!-- 标签 -->
@@ -74,9 +85,9 @@
                     <!--正确的唤起外键方式:A.foreignKey.all-->
                         {% for tag in article.tags.all %}
                             <!--将tag以get方法传给article_list函数-->
-                            <a href="{% url "article:article_list" %}?tag={{ tag }}&order=normal&search={{ search }}&column={{ column }}"
+                            <a href="{% url "article:article_list" %}?tag={{ tag }}&order={{ order }}&search={{ search }}&column={{ column }}"
                                class=" btn-secondary"
-                            style="text-decoration: none;">
+                               style="text-decoration: none;">
                                 {{ tag }}
                             </a>
                         {% endfor %}
@@ -95,24 +106,27 @@
                         </p>
                     </div>
                     <!-- 注脚 -->
-                    <p>
+                    <p >
                         <!--附加信息-->
                         <!-- 显示浏览量 -->
-                        <span style="color: #5fb878">
-                                {{ article.total_views }} 浏览&nbsp;&nbsp;&nbsp;
+                        <span class="">
+                           <i class="bi bi-eye justify-content-center" style="color: #5fb878"></i>
+                            {{ article.total_views }}&nbsp;&nbsp;&nbsp;
                         </span>
-                        <!-- 显示创立时间 -->
-                        <span style="color: blue">
-                               {{ article.created_time|date:'Y-m-d' }} 发布&nbsp;&nbsp;&nbsp;
+                        <!-- 修改为评论的计数 -->
+                        <span>
+                           <i class="bi bi-chat-right-text" style="color: blue"></i>
+                            {{ article.article_comment.count }}&nbsp;&nbsp;&nbsp;
                         </span>
                         <!-- 显示更新时间 -->
-                        <span style="color: #960050">
-                               {{ article.updated_time|date:'Y-m-d' }} 更新&nbsp;&nbsp;&nbsp;
+                        <span>
+                            <i class="bi bi-cloud-upload"
+                               style="color: hotpink;"></i>{{ article.updated_time|date:'Y-m-d' }}&nbsp;&nbsp;&nbsp;
                         </span>
                     </p>
-                    <hr>
-                </div>
 
+                </div>
+                <hr class="m-3" style="width: 100%;"/>
             {% endfor %}
         </div>
         <!-- 页码导航 -->

@@ -14,4 +14,4 @@ class ArticlePostForm(forms.ModelForm):
         #指明模型数据来源
         model = ArticlePost
         #指明要显示的字段
-        fields = ['title', 'content','column','tags']
+        fields = ['title', 'content','column','tags','avatar']

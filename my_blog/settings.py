@@ -13,10 +13,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -24,11 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-^st-tmzyad$w2+i2(&0pfx8%7jm7dy2$8^mx2=y=z!-^ak(k)s"
 
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -45,6 +44,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'taggit',
     'PIL',
+    'ckeditor',  # 没有注册就会寄
 ]
 
 MIDDLEWARE = [
@@ -75,8 +75,103 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "my_blog.wsgi.application"
+# CKEDITOR_CONFIGS = {
+#     # django-ckeditor默认使用default配置
+#     'default': {
+#         # 编辑器宽度自适应
+#         'width': 'auto',
+#         'height': '250px',
+#         # tab键转换空格数
+#         'tabSpaces': 4,
+#         # 工具栏风格
+#         'toolbar': 'Custom',
+#         # 工具栏按钮
+#         'toolbar_Custom': [
+#             # 表情 代码块
+#             ['Smiley', 'CodeSnippet'],
+#             # 字体风格
+#             ['Bold', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
+#             # 字体颜色
+#             ['TextColor', 'BGColor'],
+#             # 链接
+#             ['Link', 'Unlink'],
+#             # 列表
+#             ['NumberedList', 'BulletedList'],
+#             # 最大化
+#             ['Maximize']
+#         ],
+#         # 加入代码块，上传图片等插件
+#         'extraPlugins': ','.join([
+#             'codesnippet',
+#             'prism',
+#             'uploadimage',
+#             'widget',
+#             'lineutils'])
+#     }
+# }
 
+
+#使用ck的工具栏并修改，宽度自适应
+CKEDITOR_CONFIGS = {
+    # django-ckeditor默认使用default配置
+    'default': {
+        # 编辑器宽度自适应
+        'width':'auto',
+        'height':'250px',
+        # tab键转换空格数
+        'tabSpaces': 4,
+        # 工具栏风格
+        'toolbar': 'Custom',
+        # 工具栏按钮
+        'toolbar_Custom': [
+            # 预览、表情
+            ['Preview','Smiley'],
+            # 字体风格
+            ['Bold', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
+            # 字体颜色
+            ['TextColor', 'BGColor'],
+            #格式、字体、大小
+            ['Format','Font','FontSize'],
+            # 链接
+            ['Link', 'Unlink'],
+            # 列表
+            ['Image', 'NumberedList', 'BulletedList'],
+            #居左，居中，居右
+            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+            # 最大化
+            ['Maximize']
+        ],
+        # 加入代码块插件
+        'extraPlugins': ','.join(['codesnippet','image2','filebrowser','widget', 'lineutils']),
+    },
+    #评论
+    'comment': {
+        # 编辑器宽度自适应
+        'width': 'auto',
+        'height': '140px',
+        # tab键转换空格数
+        'tabSpaces': 4,
+        # 工具栏风格
+        'toolbar': 'Custom',
+        # 工具栏按钮
+        'toolbar_Custom': [
+            # 表情 代码块
+            ['Smiley', 'CodeSnippet'],
+            # 字体风格
+            ['Bold', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
+            # 字体颜色
+            ['TextColor', 'BGColor'],
+            # 链接
+            ['Link', 'Unlink'],
+            # 列表
+            ['NumberedList', 'BulletedList'],
+        ],
+        # 加入代码块插件
+        'extraPlugins': ','.join(['codesnippet']),
+    }
+}
+
+WSGI_APPLICATION = "my_blog.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -87,7 +182,6 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -107,7 +201,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -119,7 +212,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -129,7 +221,6 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 
 # MEDIA_URL代表用户通过URL来访问这个本地地址的URL。
 # 设置好这个参数后，用户就可以通过解析url，很方便的获取文件的地址。这样做的好处是避免硬编码，让代码更容易维护。

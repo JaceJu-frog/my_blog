@@ -16,7 +16,9 @@
                     <div class="form-group">
                         <!-- 文本域不需要 value 属性，直接在标签体中嵌入数据即可 -->
                         <label for="comment">开始撰写你的评论内容</label>
-                        <textarea type="text" class="form-control" id="comment" name="comment" rows="12"></textarea>
+{#                        <textarea type="text" class="form-control" id="comment" name="comment" rows="12"></textarea>#}
+                        {{ comment_form.media }}
+                        {{ comment_form.comment }}
                     </div>
                     <button type="submit" class="btn btn-primary">发表评论</button>
                 </form>

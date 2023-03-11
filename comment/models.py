@@ -2,6 +2,7 @@ from django.db import models
 # 导入内建的User模型
 from django.contrib.auth.models import User
 from article.models import ArticlePost
+from ckeditor.fields import RichTextField
 
 
 class ArticleComment(models.Model):
@@ -15,7 +16,8 @@ class ArticleComment(models.Model):
                                         on_delete=models.CASCADE,
                                         blank=True,null=True,related_name="article_comment")
     # 保存评论的大量文本使用TextField
-    comment = models.TextField()
+    # 但是此处引入富文本插件ckeditor,改成RichTextField
+    comment = RichTextField(blank=True,config_name='default')
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:

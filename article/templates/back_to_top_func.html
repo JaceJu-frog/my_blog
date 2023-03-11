@@ -1,0 +1,66 @@
+<style>
+    /* 按钮边框的大小、位置、样式 */
+    .toTop-arrow {
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+        margin: 0;
+        border: 0;
+        border-radius: 33%;
+        opacity: 0.7;
+        background: black;
+        cursor: pointer;
+        position: fixed;
+        right: 1.5rem;
+        bottom: 3rem;
+        display: none;
+    }
+
+    /* 绘制按钮中的向上箭头 */
+    .toTop-arrow::before, .toTop-arrow::after {
+        width: 20px;
+        height: 5px;
+        border-radius: 3px;
+        background: orange;
+        position: absolute;
+        content: "";
+    }
+
+    .toTop-arrow::before {
+        transform: rotate(-45deg) translate(0, -50%);
+        left: 0.4rem;
+    }
+
+    .toTop-arrow::after {
+        transform: rotate(45deg) translate(0, -50%);
+        right: 0.4rem;
+    }
+
+    /*鼠标放在按钮上会变蓝*/
+    .toTop-arrow:hover {
+        background-color: blue;
+    }
+</style>
+
+<button type="button" id="BackTop" class="toTop-arrow" style="z-index: 100;" onclick="back_top()"></button>
+
+<script>
+    window.onscroll = () => {
+        if (window.scrollY > 20) {// Replace "500" with your desired scroll distance
+            document.getElementById("BackTop").style.display = "block";
+            console.log("Scrolled more than 20 pixels!");
+        }
+        else {// Replace "500" with your desired scroll distance
+            document.getElementById("BackTop").style.display = "none";
+            console.log("Scrolled back,smaller than 20 pixels!");
+        }
+    }
+
+    // 向上滚动的函数，直接用人家造好的轮子
+    function back_top() {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+</script>
