@@ -72,8 +72,10 @@ def article_list(request):
     # 引入paginator，每页1篇
     article_paginator = Paginator(article_listing, 3)
     # 网页展示为.../?page=1,get是用于获取页码的
+
     page_number = request.GET.get('page')
     # 将导航对象相应的页码内容返回，获取articles
+    # 一些针对page_number的纠错paginator自己就有，不必多此一举。
     articles = article_paginator.get_page(page_number)
 
     # 在视图中通过Paginator类，给传递给模板的内容做了手脚：

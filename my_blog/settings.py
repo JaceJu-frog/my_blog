@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'taggit',
     'PIL',
     'ckeditor',  # 没有注册就会寄
+    'mptt', # 树形结构，本教程用在多级评论
 ]
 
 MIDDLEWARE = [

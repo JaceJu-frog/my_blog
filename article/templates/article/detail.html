@@ -11,10 +11,11 @@
 <!-- 写入 base.html 中定义的 content -->
 {% block content %}
 
-<script src="{% static 'prism/prism.js' %}"></script>
-<link rel="stylesheet" href="{% static 'prism/prism.css' %}">
+    <script src="{% static 'prism/prism.js' %}"></script>
 
-{% include 'back_to_top_func.html' %}
+    <link rel="stylesheet" href="{% static 'prism/prism.css' %}">
+
+    {% include 'back_to_top_func.html' %}
     <!-- 文章详情 -->
     <div class="container">
         <div class="row">
@@ -33,87 +34,102 @@
         </div>
         <div class="row">
             <!-- 文章正文，占9栏,这个9栏很长哦 -->
-            <div class="col-9">
-            {#     这里加上|safe防止html乱转义#}
-            <p>{{ article.content|safe }}</p>
-            <form method="post" action="{% url "comment:create_article_comment" article.id %}">
-                {% csrf_token %}
-                <div class="form-group">
-                    <!-- 文本域不需要 value 属性，直接在标签体中嵌入数据即可 -->
-                    <label for="comment">我也要发言</label>
-                    <!-- 这个只是简单输入文字<textarea type="text" class="form-control" id="comment" name="comment" rows="5"
-                              cols="4"></textarea>-->
-                    <div>
-                        {{ article_comment_form.media }}
-                        {{ article_comment_form.as_p |safe}}
+            <div class="col-9 main-content">
+                {#     这里加上|safe防止html乱转义#}
+                <p>{{ article.content|safe }}</p>
+                <form method="post" action="{% url "comment:create_article_comment" article.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <!-- 文本域不需要 value 属性，直接在标签体中嵌入数据即可 -->
+                        <label for="comment">我也要发言</label>
+                        <!-- 这个只是简单输入文字<textarea type="text" class="form-control" id="comment" name="comment" rows="5"
+                                  cols="4"></textarea>-->
+                        <div>
+                            {{ article_comment_form.media }}
+                            {{ article_comment_form.as_p |safe }}
+                        </div>
+                    </div>
+                    <!--提交按钮还得有-->
+                    <button type="submit" class="btn btn-primary">发表评论</button>
+                </form>
+
+                <!-- 展示当前文章关联的评论 -->
+                <h4>共有{{ article_comments_count }}条评论</h4>
+                {% for comment in article.article_comment.all %}
+                    <!--hr是一根横线-->
+                    <hr>
+                    <!--p中整体为一个段落，不换行-->
+                    <p>
+                        <!--strong为粗体-->
+                        <strong style="color: pink">
+                            {{ comment.author }}
+                        </strong>于
+                        <!--span本身并不代表什么，用于group items-->
+                        <span style="color: green">{{ comment.created|date:"Y-m-d H:i:s" }}
+                             </span>时说：
+                    </p>
+                    <div style="font-family: inherit; font-size: 1em;">
+                        {{ comment.comment|safe }}
+                    </div>
+
+                {% endfor %}
+            </div>
+            <!-- 文章的目录，占3栏 -->
+            <div class="col-3">
+                <div class="sidebar">
+                    <div class="sidebar__inner">
+                        {{ toc|safe }}
                     </div>
                 </div>
-                <!--提交按钮还得有-->
-                <button type="submit" class="btn btn-primary">发表评论</button>
-            </form>
-
-            <!-- 展示当前文章关联的评论 -->
-            <h4>共有{{ article_comments_count }}条评论</h4>
-            {% for comment in article.article_comment.all %}
-                <!--hr是一根横线-->
-                <hr>
-                <!--p中整体为一个段落，不换行-->
-                <p>
-                <!--strong为粗体-->
-                <strong style="color: pink">
-                    {{ comment.author }}
-                </strong>于
-                <!--span本身并不代表什么，用于group items-->
-                <span style="color: green">{{ comment.created|date:"Y-m-d H:i:s" }}
-                             </span>时说：
-                </p>
-                <div style="font-family: inherit; font-size: 1em;">
-                    {{ comment.comment|safe }}
-                </div>
-
-            {% endfor %}
+            </div>
         </div>
-        <!-- 文章的目录，占3栏 -->
-        <div class="col-3">
-            {{ toc|safe }}
-        </div>
-        </div>
-    </div>
 
-    <!-- 新增一个隐藏的表单，用于删除 -->
-    <form
-            style="display:none;"
-            id="safe_delete"
-            action="{% url 'article:article_delete' article.id %}"
-            method="POST"
-    >
-        {% csrf_token %}
-        <button type="submit">发送</button>
-    </form>
-    <script>
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
+        <!-- 新增一个隐藏的表单，用于删除 -->
+        <form
+                style="display:none;"
+                id="safe_delete"
+                action="{% url 'article:article_delete' article.id %}"
+                method="POST"
+        >
+            {% csrf_token %}
+            <button type="submit">发送</button>
+        </form>
+        <script>
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
 
-        function confirm_delete() {
-            var layer = layui.layer;
+            function confirm_delete() {
+                var layer = layui.layer;
 
-            // Create a prompt box with the "yes" button
-            layer.confirm('是否确定删除？', {
-                btn: ['是的', '不是'] // Specify the text for the buttons
-            }, function execute_delete() {
-                // If the user clicks "Yes", execute this function
-                layer.msg('你确认删除了！');
-                sleep(2000).then(() => {
-                    document.querySelector('form#safe_delete button').click();
-                    {#location.href = '{% url "article:article_delete" article.id %}'#}
-                })
+                // Create a prompt box with the "yes" button
+                layer.confirm('是否确定删除？', {
+                    btn: ['是的', '不是'] // Specify the text for the buttons
+                }, function execute_delete() {
+                    // If the user clicks "Yes", execute this function
+                    layer.msg('你确认删除了！');
+                    sleep(2000).then(() => {
+                        document.querySelector('form#safe_delete button').click();
+                        {#location.href = '{% url "article:article_delete" article.id %}'#}
+                    })
 
-            }, function () {
-                // If the user clicks "No", execute this function
-                layer.msg('你还要再想想');
-            });
-        }
-    </script>
+                }, function () {
+                    // If the user clicks "No", execute this function
+                    layer.msg('你还要再想想');
+                });
+            }
+        </script>
 
 {% endblock content %}
+
+{% block script %}
+    <script src="{% static 'sticky-sidebar/sticky-sidebar.js' %}"></script>
+<script type="text/javascript">
+  var sidebar = new StickySidebar('.sidebar', {
+    topSpacing: 20,
+    bottomSpacing: 20,
+    containerSelector: '.main-content',
+    innerWrapperSelector: '.sidebar__inner'
+  });
+</script>
+{% endblock script %}
