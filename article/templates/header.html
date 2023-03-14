@@ -1,5 +1,8 @@
-
 <!-- 新增 -->
+
+<!-- 引入notifications的模板标签 -->
+{% load notifications_tags %}
+{% notifications_unread as unread_count %}
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
@@ -23,7 +26,13 @@
                             {{ user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
-                            <li><a class="dropdown-item nav-link" href="{% url "article:article_create" %}">新建文章</a></li>
+                            <!-- 新增代码，通知计数 -->
+                            {% if unread_count %}
+                            <a class="dropdown-item" href="{% url "notice:list" %}">通知: <span class="badge bg-danger justify-content-center text-left"  >{{ unread_count }}</span></a>
+                            {% endif %}
+
+                            <li><a class="dropdown-item nav-link" href="{% url "article:article_create" %}">新建文章</a>
+                            </li>
                             <li><a class="dropdown-item" href='{% url "userprofile:edit" user.id %}'>个人信息</a></li>
                             <li><a class="dropdown-item" href="#" onclick="user_delete()">删除用户</a></li>
                             <li><a class="dropdown-item" href="{% url "userprofile:logout" %}">退出登录</a></li>
@@ -45,18 +54,18 @@
 
 {# 判断用户是否登录，不能放在这个header.html的头部，否则 整个导航栏都不显示啦#}
 {% if user.is_authenticated %}
-{#   隐藏表单#}
-<form
-    style="display:none;"
-    id="user_delete"
-    action="{% url 'userprofile:delete' user.id %}"
-    method="POST"
->
-{% csrf_token %}
-    <button type="submit" >删除用户</button>
-</form>
+    {#   隐藏表单#}
+    <form
+            style="display:none;"
+            id="user_delete"
+            action="{% url 'userprofile:delete' user.id %}"
+            method="POST"
+    >
+        {% csrf_token %}
+        <button type="submit">删除用户</button>
+    </form>
 
-<script>
+    <script>
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
@@ -82,6 +91,6 @@
                 layer.msg('你还要再想想');
             });
         }
-</script>
+    </script>
 
 {% endif %}

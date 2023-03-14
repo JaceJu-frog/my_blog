@@ -4,9 +4,32 @@ from django.contrib.auth.models import User
 from article.models import ArticlePost
 from ckeditor.fields import RichTextField
 
+# django-mptt
+from mptt.models import MPTTModel, TreeForeignKey
 
-class ArticleComment(models.Model):
+
+class ArticleComment(MPTTModel):
     """评论"""
+
+    # 新增，mptt树形结构
+    # parent字段是必须定义的，用于存储数据之间的关系，不要去修改它。
+    parent = TreeForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='children'
+    )
+
+    # 新增，记录二级评论回复给谁,用于存储被评论人
+    reply_to = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='replyers'
+    )
+
     # 评论由外键连接唯一的作者
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
@@ -20,7 +43,7 @@ class ArticleComment(models.Model):
     comment = RichTextField(blank=True,config_name='default')
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering=('created',)
+    class MPTTMeta:
+        ordering=['created']
     def __str__(self):
         return self.comment[:20]

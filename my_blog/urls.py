@@ -17,12 +17,17 @@ from django.contrib import admin
 from django.urls import include,path
 from django.conf import settings
 from django.conf.urls.static import static
+import notifications.urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("article/", include("article.urls",namespace="article")),
     path('userprofile/', include('userprofile.urls',namespace='userprofile')),
     path('comment/', include('comment.urls',namespace='comment')),
+    # 这里的notifications.urls没有像之前一样用字符串，是为了确保模块安装到正确的命名空间中。
+    path('inbox/notifications',include(notifications.urls,namespace='notifications')),
+    # notice
+    path('notice/',include('notice.urls',namespace='notice')),
 ]
 
 #添加这行为以后上传的图片配置URL路径

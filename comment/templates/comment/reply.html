@@ -1,0 +1,72 @@
+{% load static %}
+
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <title>撰写一个二级评论</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+</head>
+
+<body>
+    <form
+    action="."
+    method="POST"
+    id="reply_form"
+    >
+        {% csrf_token %}
+        <div class="form-group">
+            <div id="test">
+                {{ comment_form.media }}
+                {{ comment_form.comment }}
+            </div>
+        </div>
+    </form>
+    <!-- 提交按钮 -->
+    <button onclick="confirm_submit({{ article_id }}, {{ parent_comment_id }})" class="btn btn-primary">发送</button>
+
+
+
+    <!-- csrf token -->
+    <script src="{% static 'csrf.js' %}"></script>
+
+    <script>
+    $(function(){
+        $(".django-ckeditor-widget").removeAttr('style');
+    });
+
+    function confirm_submit(article_id, comment_id){
+        // 从 ckeditor 中取值
+        let content = CKEDITOR.instances['id_comment'].getData();
+        // 调用 ajax(也就是异步) 与后端交换数据
+        $.ajax({
+            url: '/comment/article/' + article_id + '/' + comment_id,
+            type: 'POST',
+            data: {comment: content},
+            // 二级评论提交成功后会返回200 OK，回调函数接收到这个信号后，
+            // 就会调用reload()方法，刷新当前的父页面（即文章所在的页面），实现了数据的更新
+            success: function(e){
+                if(e["code"] === '200 OK'){
+                    // 原先是如果提交成功，让iframe的父页面刷新
+                    {#parent.location.reload();#}
+                    // 调用父页面的函数
+                    parent.post_reply_and_show_it(e.new_comment_id);
+                }
+            }
+        })
+    }
+
+    </script>
+
+</body>
+</html>

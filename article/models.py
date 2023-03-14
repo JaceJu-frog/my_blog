@@ -1,8 +1,9 @@
 from django.db import models
-#导入内建的User模型
+# 导入内建的User模型
 from django.contrib.auth.models import User
+from django.urls import reverse
 
-#timezone用于处理时间相关事务
+# timezone用于处理时间相关事务
 from django.utils import timezone
 # 一个处理多对多关系的管理器：
 from taggit.managers import TaggableManager
@@ -21,6 +22,7 @@ class ArticleColumn(models.Model):
         # return self.title 将文章标题返回
         return self.title
 
+
 # 博客文章的数据模型
 class ArticlePost(models.Model):
     # 文章作者。参数 on_delete用于指定数据删除的方式
@@ -28,7 +30,7 @@ class ArticlePost(models.Model):
     # Django具有一个简单的账号系统（User），满足一般网站的用户相关的基本功能。
 
     # 文章所属栏目
-    column = models.ForeignKey(ArticleColumn, on_delete=models.CASCADE,null=True,blank=True,related_name="articles")
+    column = models.ForeignKey(ArticleColumn, on_delete=models.CASCADE, null=True, blank=True, related_name="articles")
     # 文章标签
     tags = TaggableManager(blank=True)
 
@@ -39,7 +41,11 @@ class ArticlePost(models.Model):
     title = models.CharField(max_length=200)
 
     # 文章标题图
-    avatar = models.ImageField(upload_to='article/%Y%m%d',blank=True,null=True)
+    avatar = models.ImageField(upload_to='article/%Y%m%d', blank=True, null=True)
+
+    # 获取文章地址
+    def get_absolute_url(self):
+        return reverse('article:article_detail', args=[self.id])
 
     # 重载save()函数
     def save(self, *args, **kwargs):
@@ -51,8 +57,8 @@ class ArticlePost(models.Model):
         # 固定宽度缩放图片大小
         if self.avatar and not kwargs.get('update_fields'):
             img = Image.open(self.avatar.path)
-            (x,y)=img.size
-            new_x=400
+            (x, y) = img.size
+            new_x = 400
             new_y = int(new_x * (y / x))
             # Image.ANTIALIAS表示缩放采用平滑滤波。
             img = img.resize((new_x, new_y), Image.ANTIALIAS)
@@ -70,7 +76,7 @@ class ArticlePost(models.Model):
     # 文章更新时间。 参数 auto_now=True指定每次更新数据时自动写入当前时间
     updated_time = models.DateTimeField(auto_now=True)
 
-    class Meta: # class Meta提供元数据，也就是内部数据，这些信息不是某篇文章私有，而是整张表的共同行为。
+    class Meta:  # class Meta提供元数据，也就是内部数据，这些信息不是某篇文章私有，而是整张表的共同行为。
         # ordering 指定模型返回的数据的排列顺序
         # "-created_time"表示返回数据应以创建时间倒序排列
         ordering = ('-created_time',)

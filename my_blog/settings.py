@@ -22,12 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-^st-tmzyad$w2+i2(&0pfx8%7jm7dy2$8^mx2=y=z!-^ak(k)s"
 
-
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Application definition
 
@@ -45,7 +44,9 @@ INSTALLED_APPS = [
     'taggit',
     'PIL',
     'ckeditor',  # 没有注册就会寄
-    'mptt', # 树形结构，本教程用在多级评论
+    'mptt',  # 树形结构，本教程用在多级评论
+    'notifications', # 一个发送消息的插件
+    'notice',# 真正发送信息的url
 ]
 
 MIDDLEWARE = [
@@ -112,13 +113,15 @@ TEMPLATES = [
 # }
 
 
-#使用ck的工具栏并修改，宽度自适应
+# 使用ck的工具栏并修改，宽度自适应
 CKEDITOR_CONFIGS = {
     # django-ckeditor默认使用default配置
     'default': {
         # 编辑器宽度自适应
-        'width':'auto',
-        'height':'250px',
+        'width': 'auto',
+        'height': '250px',
+        # 移除exportpdf插件避免控制台吵
+        "removePlugins": "exportpdf",
         # tab键转换空格数
         'tabSpaces': 4,
         # 工具栏风格
@@ -126,26 +129,26 @@ CKEDITOR_CONFIGS = {
         # 工具栏按钮
         'toolbar_Custom': [
             # 预览、表情
-            ['Preview','Smiley'],
+            ['Preview', 'Smiley'],
             # 字体风格
             ['Bold', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
             # 字体颜色
             ['TextColor', 'BGColor'],
-            #格式、字体、大小
-            ['Format','Font','FontSize'],
+            # 格式、字体、大小
+            ['Format', 'Font', 'FontSize'],
             # 链接
             ['Link', 'Unlink'],
             # 列表
-            ['Image', 'NumberedList', 'BulletedList'],
-            #居左，居中，居右
-            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+            ['NumberedList', 'BulletedList'],
+            # 居左，居中，居右
+            ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             # 最大化
             ['Maximize']
         ],
         # 加入代码块插件
-        'extraPlugins': ','.join(['codesnippet','image2','filebrowser','widget', 'lineutils']),
+        'extraPlugins': ','.join(['codesnippet', 'widget', 'lineutils']),
     },
-    #评论
+    # 评论
     'comment': {
         # 编辑器宽度自适应
         'width': 'auto',

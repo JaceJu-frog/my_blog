@@ -104,16 +104,16 @@ def article_detail(request, id):
     ])
     article.content = md.convert(article.content)
 
-    article_comments_count = article.article_comment.count()
+    article_comments = article.article_comment.all()
     # 需要传递给模板的对象，虽然上面的语句改变了article.content，但是context中依然传入article就好。
     # 此外md.toc 算是个html对象，传入markdown的标题结构。
     # 第三，为了在评论中使用富文本，将评论的表单传到文章详情页面中
 
     article_comment_form = ArticleCommentForm()
-    print(article_comment_form)
+    # print(article_comment_form)
     # print(article_comment_form.author)
-
-    context = {'article': article, 'toc': md.toc, 'article_comments_count': article_comments_count,
+    # 传入文章，大纲，评论，新建评论所用表单
+    context = {'article': article, 'toc': md.toc, 'article_comments': article_comments,
                'article_comment_form':article_comment_form}
     # 载入模板，并返回context对象
     return render(request, 'article/detail.html', context)
