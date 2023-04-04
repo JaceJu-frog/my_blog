@@ -18,8 +18,10 @@ from django.urls import include,path
 from django.conf import settings
 from django.conf.urls.static import static
 import notifications.urls
+from article.views import article_list
 
 urlpatterns = [
+    path("",article_list,name="home"),
     path("admin/", admin.site.urls),
     path("article/", include("article.urls",namespace="article")),
     path('userprofile/', include('userprofile.urls',namespace='userprofile')),
@@ -28,6 +30,8 @@ urlpatterns = [
     path('inbox/notifications',include(notifications.urls,namespace='notifications')),
     # notice
     path('notice/',include('notice.urls',namespace='notice')),
+    # allauth的登录，也是一个单独的APP
+    path('accounts/', include('allauth.urls')),
 ]
 
 #添加这行为以后上传的图片配置URL路径

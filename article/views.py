@@ -19,6 +19,9 @@ from django.core.paginator import Paginator
 
 from comment.forms import ArticleCommentForm
 
+#类视图
+from django.views import View
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at the article index.")
@@ -119,7 +122,7 @@ def article_detail(request, id):
     return render(request, 'article/detail.html', context)
 
 
-@login_required(login_url='/userprofile/login/')  # 需要登录
+@login_required(login_url='/accounts/login/')  # 需要登录
 def article_create(request):
     # 判断用户是否提交数据
     if request.method == 'POST':
@@ -153,7 +156,7 @@ def article_create(request):
         return render(request, 'article/article_create.html', context=context)
 
 
-@login_required(login_url='/userprofile/login/')
+@login_required(login_url='/accounts/login/')
 def article_delete(request, id):
     # 以POST形式，否则别人用get可以直接删除
     if request.method == 'POST':
@@ -170,7 +173,7 @@ def article_delete(request, id):
         return HttpResponse("仅允许post请求")
 
 
-@login_required(login_url='/userprofile/login/')
+@login_required(login_url='/accounts/login/')
 def article_update(request, id):
     """
     更新文章的视图函数
@@ -227,3 +230,13 @@ def article_update(request, id):
         # 将get模块也设计得有些复杂，是防止坏用户直接猜到链接输入。
         else:
             return HttpResponse("只有作者才能修改")
+
+# 类视图的点赞
+# 点赞数 +1
+class IncreaseLikesView(View):
+    def post(self, request, *args, **kwargs):
+        article = ArticlePost.objects.get(id=kwargs.get('id'))
+        article.likes += 1
+        article.save()
+        return HttpResponse('success')
+        

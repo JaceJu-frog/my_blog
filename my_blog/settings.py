@@ -23,10 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-^st-tmzyad$w2+i2(&0pfx8%7jm7dy2$8^mx2=y=z!-^ak(k)s"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# 静态文件收集目录
+STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
 
 # Application definition
 
@@ -36,6 +39,7 @@ INSTALLED_APPS = [
     'comment',
     "django.contrib.admin",
     "django.contrib.auth",
+    "django.contrib.sites",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
@@ -45,8 +49,15 @@ INSTALLED_APPS = [
     'PIL',
     'ckeditor',  # 没有注册就会寄
     'mptt',  # 树形结构，本教程用在多级评论
-    'notifications', # 一个发送消息的插件
-    'notice',# 真正发送信息的url
+    'notifications',  # 一个发送消息的插件
+    'notice',  # 真正发送信息的url
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # 可添加需要的第三方登录
+    "allauth.socialaccount.providers.github",
+    "allauth.socialaccount.providers.weibo",
 ]
 
 MIDDLEWARE = [
@@ -77,41 +88,44 @@ TEMPLATES = [
     },
 ]
 
-# CKEDITOR_CONFIGS = {
-#     # django-ckeditor默认使用default配置
-#     'default': {
-#         # 编辑器宽度自适应
-#         'width': 'auto',
-#         'height': '250px',
-#         # tab键转换空格数
-#         'tabSpaces': 4,
-#         # 工具栏风格
-#         'toolbar': 'Custom',
-#         # 工具栏按钮
-#         'toolbar_Custom': [
-#             # 表情 代码块
-#             ['Smiley', 'CodeSnippet'],
-#             # 字体风格
-#             ['Bold', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
-#             # 字体颜色
-#             ['TextColor', 'BGColor'],
-#             # 链接
-#             ['Link', 'Unlink'],
-#             # 列表
-#             ['NumberedList', 'BulletedList'],
-#             # 最大化
-#             ['Maximize']
-#         ],
-#         # 加入代码块，上传图片等插件
-#         'extraPlugins': ','.join([
-#             'codesnippet',
-#             'prism',
-#             'uploadimage',
-#             'widget',
-#             'lineutils'])
-#     }
-# }
+AUTHENTICATION_BACKENDS = (
+    # Django 后台可独立于 allauth 登录
+    'django.contrib.auth.backends.ModelBackend',
 
+    # 配置 allauth 独有的认证方法，如 email 登录
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+# 设置站点
+SITE_ID = 1
+
+# 登录成功后重定向地址
+# 在urls.py中小改了一下主页的位置，见
+# https://www.dusaiphoto.com/article/66/#_1
+LOGIN_REDIRECT_URL = '/'
+
+# 简单的日志配置
+# 见https://www.dusaiphoto.com/article/68/#_4
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'midnight',
+            'backupCount': 30,
+            'filename': os.path.join(BASE_DIR, 'logs/debug.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
 # 使用ck的工具栏并修改，宽度自适应
 CKEDITOR_CONFIGS = {

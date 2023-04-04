@@ -56,6 +56,8 @@
             // 二级评论提交成功后会返回200 OK，回调函数接收到这个信号后，
             // 就会调用reload()方法，刷新当前的父页面（即文章所在的页面），实现了数据的更新
             success: function(e){
+                // e表示event，我们通过comment/views.py返回一个json
+                // 取其中的值当然要拿键
                 if(e["code"] === '200 OK'){
                     // 原先是如果提交成功，让iframe的父页面刷新
                     {#parent.location.reload();#}

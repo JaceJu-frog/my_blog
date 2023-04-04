@@ -15,7 +15,7 @@ def index(request):
     return HttpResponse("Hello, world. You're at the comment index.")
 
 
-@login_required(login_url='/userprofile/login/')
+@login_required(login_url='/accounts/login/')
 # 新增参数 parent_comment_id，用于区分多级评论
 # 对一级评论，缺省值None.
 def create_article_comment(request, article_id, parent_comment_id=None):

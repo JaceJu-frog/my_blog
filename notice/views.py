@@ -18,7 +18,7 @@ class CommentNoticeListView(LoginRequiredMixin,ListView):
     template_name = 'notice/list.html'
     # 登录重定向
     # 来自混合功能类LoginRequiredMixin
-    login_url = '/userprofile/login'
+    login_url = '/accounts/login'
 
     def get_queryset(self):
         # 别管pycharm报错，这个能用。

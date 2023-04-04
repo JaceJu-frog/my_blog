@@ -4,6 +4,7 @@ from . import views
 from my_blog import urls
 from .views import article_list
 
+
 app_name = 'article'
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('article_create/',views.article_create,name='article_create'),
     path('article_delete/<int:id>/',views.article_delete,name='article_delete'),
     path('article_update/<int:id>/',views.article_update,name='article_update'),
+    path('increase-likes/<int:id>/',views.IncreaseLikesView.as_view(), name='increase_likes'),
 ]

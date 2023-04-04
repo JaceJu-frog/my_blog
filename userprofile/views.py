@@ -66,8 +66,8 @@ def user_register(request):
 
 # @login_required是一个Python装饰器。装饰器可以在不改变某个函数内容的前提下，给这个函数添加一些功能。
 # 具体来说就是@login_required要求调用user_delete()函数时，用户必须登录；
-# 如果未登录则不执行函数，将页面重定向到/userprofile/login/地址去。
-@login_required(login_url='/userprofile/login/')
+# 如果未登录则不执行函数，将页面重定向到/accounts/login/地址去。
+@login_required(login_url='/accounts/login/')
 def user_delete(request, id):
     if request.method == 'POST':
         user = User.objects.get(id=id)
@@ -83,7 +83,7 @@ def user_delete(request, id):
     else:
         return HttpResponse("仅接受post请求。")
 
-@login_required(login_url='/userprofile/login/')
+@login_required(login_url='/accounts/login/')
 def profile_edit(request,id):
     user = User.objects.get(id=id)
 

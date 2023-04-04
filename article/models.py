@@ -47,6 +47,9 @@ class ArticlePost(models.Model):
     def get_absolute_url(self):
         return reverse('article:article_detail', args=[self.id])
 
+    # 点赞数量
+    likes = models.PositiveIntegerField(default=0)
+    
     # 重载save()函数
     def save(self, *args, **kwargs):
         # 调用父类(models.Model)的save()功能
@@ -81,6 +84,14 @@ class ArticlePost(models.Model):
         # "-created_time"表示返回数据应以创建时间倒序排列
         ordering = ('-created_time',)
         # 注意ordering是元组，括号中只含一个元素时不要忘记末尾的逗号。
+
+    def was_created_recently(self):
+        # 若文章是最近发表的，则返回True
+        diff = timezone.now() - self.created_time
+        if diff.days == 0 and 0 <= diff.seconds < 60:
+            return True
+        else:
+            return False
 
     def __str__(self):
         # __str__方法定义了需要表示数据时应该显示的名称。
