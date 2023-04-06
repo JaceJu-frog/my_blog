@@ -66,7 +66,7 @@
                     <!-- 栏目名 -->
                     {% if article.column %}
                         <a role="button" href="{% url "article:article_list" %}?column={{ article.column.id }}" type="button"
-                                class="btn btn-sm mb-2
+                                class="btn mb-2
                         {% if article.column.title == 'Python' %}
                             btn-success
                         {% elif article.column.title == 'Java' %}
@@ -87,7 +87,7 @@
                         {% for tag in article.tags.all %}
                             <!--将tag以get方法传给article_list函数-->
                             <a href="{% url "article:article_list" %}?tag={{ tag }}&order={{ order }}&search={{ search }}&column={{ column }}"
-                               class=" btn-secondary"
+                               class="btn-secondary btn btn-sm"
                                style="text-decoration: none;">
                                 {{ tag }}
                             </a>
@@ -175,6 +175,5 @@
             </div>
         </div>
     </div>
-
 {% endblock content %}
 

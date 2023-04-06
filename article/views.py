@@ -32,7 +32,7 @@ def article_list(request):
     search = request.GET.get('search')
     order = request.GET.get('order')
     column = request.GET.get('column')
-    print(column)
+    # print(column)
     tag = request.GET.get('tag')
 
     # 初始化查询集

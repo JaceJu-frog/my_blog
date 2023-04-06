@@ -16,20 +16,12 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-^st-tmzyad$w2+i2(&0pfx8%7jm7dy2$8^mx2=y=z!-^ak(k)s"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-
-ALLOWED_HOSTS = ['*']
-X_FRAME_OPTIONS = 'SAMEORIGIN'
-
-# 静态文件收集目录
-STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
 
 # Application definition
 
@@ -88,6 +80,10 @@ TEMPLATES = [
     },
 ]
 
+# 设置站点，系统自带，与数据库在多页面上的操作有关
+SITE_ID = 1
+
+# 设置allauth登录
 AUTHENTICATION_BACKENDS = (
     # Django 后台可独立于 allauth 登录
     'django.contrib.auth.backends.ModelBackend',
@@ -96,8 +92,6 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-# 设置站点
-SITE_ID = 1
 
 # 登录成功后重定向地址
 # 在urls.py中小改了一下主页的位置，见
@@ -143,7 +137,7 @@ CKEDITOR_CONFIGS = {
         # 工具栏按钮
         'toolbar_Custom': [
             # 预览、表情
-            ['Preview', 'Smiley'],
+            ['Preview', 'Smiley', 'CodeSnippet'],
             # 字体风格
             ['Bold', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
             # 字体颜色
@@ -201,6 +195,12 @@ DATABASES = {
     }
 }
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -230,15 +230,26 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.1/howto/static-files/
+
+ALLOWED_HOSTS = ['*'] #允许访问主机的IP和网址
+X_FRAME_OPTIONS = 'SAMEORIGIN' # X_FRAME_OPTIONS = 'SAMEORIGIN'：在教程发表二级评论时嵌入iframe
+
+# 静态文件收集目录
+STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
+
+STATIC_URL = "static/"
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+)
 
 # MEDIA_URL代表用户通过URL来访问这个本地地址的URL。
 # 设置好这个参数后，用户就可以通过解析url，很方便的获取文件的地址。这样做的好处是避免硬编码，让代码更容易维护。

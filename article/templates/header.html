@@ -19,11 +19,23 @@
                 </li>
                 <!-- Django的 if 模板语句 -->
                 {% if user.is_authenticated %}
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                            <!-- 新增代码，通知计数 -->
+                            {% if unread_count %}
+                            <a class="dropdown-item" href="{% url "notice:list" %}">通知: <span class="badge bg-danger justify-content-center text-left"  >{{ unread_count }}</span></a>
+                            {% endif %}
+
+                            <li><a class="dropdown-item nav-link" href="{% url "article:article_create" %}">新建文章</a></li>
+                            <li><a class="dropdown-item" href='{% url "userprofile:edit" user.id %}'>个人信息</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="user_delete()">删除用户</a></li>
+                            <li><a class="dropdown-item" href="{% url "userprofile:logout" %}">退出登录</a></li>
+                        </ul>
                     <!-- 如果用户已经登录，则显示用户名下拉框 -->
-                    <li class="nav-item dropdown">
+                    <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
                             {{ user.username }}
+
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
                             <!-- 新增代码，通知计数 -->
@@ -31,13 +43,12 @@
                             <a class="dropdown-item" href="{% url "notice:list" %}">通知: <span class="badge bg-danger justify-content-center text-left"  >{{ unread_count }}</span></a>
                             {% endif %}
 
-                            <li><a class="dropdown-item nav-link" href="{% url "article:article_create" %}">新建文章</a>
-                            </li>
+                            <li><a class="dropdown-item nav-link" href="{% url "article:article_create" %}">新建文章</a></li>
                             <li><a class="dropdown-item" href='{% url "userprofile:edit" user.id %}'>个人信息</a></li>
                             <li><a class="dropdown-item" href="#" onclick="user_delete()">删除用户</a></li>
                             <li><a class="dropdown-item" href="{% url "userprofile:logout" %}">退出登录</a></li>
                         </ul>
-                    </li>
+                    </div>
                     <!-- 如果用户未登录，则显示 “登录” -->
                 {% else %}
                     <li class="nav-item">

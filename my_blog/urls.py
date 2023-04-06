@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include,path
+from django.urls import include,path,re_path
+from django.views.static import serve
 from django.conf import settings
 from django.conf.urls.static import static
 import notifications.urls
@@ -32,6 +33,10 @@ urlpatterns = [
     path('notice/',include('notice.urls',namespace='notice')),
     # allauth的登录，也是一个单独的APP
     path('accounts/', include('allauth.urls')),
+
+    # 部署时使用，让gunicorn知道static和media文件在哪
+    re_path(r'^static/(?P<path>.*)$', serve, {"document_root": settings.STATIC_ROOT}),
+    re_path(r'^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),
 ]
 
 #添加这行为以后上传的图片配置URL路径
